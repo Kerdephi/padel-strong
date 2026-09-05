@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PadelFit - Préparation Physique</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        h1 {
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+        }
+        p.subtitle {
+            color: #6b7280;
+            margin-top: 0;
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        .exercise-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 15px 0;
+        }
+        .exercise-item:last-child {
+            border-bottom: none;
+        }
+        .ex-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--dark);
+        }
+        .ex-details {
+            font-size: 0.9em;
+            color: #4b5563;
+            margin-top: 4px;
+        }
+        .timer-box {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin: 15px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🎾 PadelFit Trainer</h1>
+        <p class="subtitle">Préparez vos appuis, votre explosivité et vos smashes</p>
+    </header>
+
+    <!-- Menu de sélection -->
+    <div class="card" id="menu-card">
+        <h2>Choisissez votre séance</h2>
+        <p>Sélectionnez l'objectif du jour pour générer votre routine :</p>
+        <button class="btn" onclick="loadWorkout('lower')">⚡ Bas du corps & Explosivité (Appuis)</button>
+        <br><br>
+        <button class="btn" onclick="loadWorkout('core')">🔄 Gainage & Puissance Rotative (Core)</button>
+        <br><br>
+        <button class="btn" onclick="loadWorkout('upper')">🛡️ Épaules & Prévention (Bandeja / Smash)</button>
+    </div>
+
+    <!-- Affichage de la séance -->
+    <div class="card hidden" id="workout-card">
+        <h2 id="workout-title">Titre de la séance</h2>
+        <div id="exercise-list"></div>
+        <button class="btn" style="background-color: #4b5563; margin-top: 15px;" onclick="resetMenu()">← Choisir une autre séance</button>
+    </div>
+
+    <!-- Minuteur de repos -->
+    <div class="card">
+        <h3>⏱️ Chrono / Pause entre les séries</h3>
+        <div class="timer-box" id="timer-display">00:45</div>
+        <button class="btn" onclick="startTimer(45)">Lancer une pause de 45s</button>
+    </div>
+</div>
+
+<script>
+    const workouts = {
+        lower: {
+            title: "⚡ Bas du corps & Explosivité",
+            exercises: [
+                { name: "Fentes Bulgares", reps: "3 séries de 10 par jambe", desc: "Développe la stabilité unilatérale pour aller chercher les amorties." },
+                { name: "Sauts latéraux (Skater jumps)", reps: "3 séries de 30 secondes", desc: "Simule les déplacements latéraux rapides sur la piste." },
+                { name: "Squats sautés (Jump Squats)", reps: "3 séries de 8", desc: "Travaille l'explosivité pour les smashes et récupérations hautes." },
+                { name: "Soulevé de terre roumain (RDL)", reps: "3 séries de 10", desc: "Renforce les ischio-jambiers et la chaîne postérieure." }
+            ]
+        },
+        core: {
+            title: "🔄 Gainage & Puissance Rotative",
+            exercises: [
+                { name: "Rotations avec élastique / Câble", reps: "3 séries de 12 par côté", desc: "Essentiel pour la transmission de force sur la vibora et le smash." },
+                { name: "Planche latérale avec mouvement", reps: "3 séries de 30s par côté", desc: "Stabilité indispensable pour encaisser les appuis contre les vitres." },
+                { name: "Russian Twists avec medecine-ball", reps: "3 séries de 20", desc: "Améliore la vitesse de rotation du tronc." },
+                { name: "Gainage dynamique (Planche to Push-up)", reps: "3 séries de 45s", desc: "Maintien de la posture sous fatigue." }
+            ]
+        },
+        upper: {
+            title: "🛡️ Épaules & Prévention des blessures",
+            exercises: [
+                { name: "Développé épaule / Push Press", reps: "3 séries de 10", desc: "Renforcement global pour supporter les frappes au-dessus de la tête." },
+                { name: "Rotations externes d'épaule à l'élastique", reps: "3 séries de 15", desc: "L'exercice clé pour protéger la coiffe des rotateurs au padel." },
+                { name: "Face Pulls", reps: "3 séries de 15", desc: "Posture du haut du dos et équilibre musculaire." },
+                { name: "Pompes inclinées ou classiques", reps: "3 séries de 12", desc: "Solidité des appuis pour les volées." }
+            ]
+        }
+    };
+
+    function loadWorkout(type) {
+        const data = workouts[type];
+        document.getElementById('workout-title').innerText = data.title;
+        
+        let html = '';
+        data.exercises.forEach(ex => {
+            html += `
+                <div class="exercise-item">
+                    <div class="ex-title">🔹 ${ex.name}</div>
+                    <div class="ex-details"><strong>Format :</strong> ${ex.reps}</div>
+                    <div class="ex-details">${ex.desc}</div>
+                </div>
+            `;
+        });
+        
+        document.getElementById('exercise-list').innerHTML = html;
+        document.getElementById('menu-card').classList.add('hidden');
+        document.getElementById('workout-card').classList.remove('hidden');
+    }
+
+    function resetMenu() {
+        document.getElementById('workout-card').classList.add('hidden');
+        document.getElementById('menu-card').classList.remove('hidden');
+    }
+
+    let countdown;
+    function startTimer(seconds) {
+        clearInterval(countdown);
+        let timeLeft = seconds;
+        const display = document.getElementById('timer-display');
+        
+        countdown = setInterval(() => {
+            let minutes = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            display.innerText = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                display.innerText = "C'est reparti ! 🚀";
+            }
+            timeLeft--;
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
